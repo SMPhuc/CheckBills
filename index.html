@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Hotel Billing</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#007aff">
+
+<!-- iOS icon -->
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<style>
+:root {
+    --bg: #f2f2f7;
+    --card: #ffffff;
+    --primary: #007aff;
+    --text: #1c1c1e;
+    --sub: #8e8e93;
+}
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+.header {
+    text-align: center;
+    font-weight: 600;
+    padding: 16px;
+    font-size: 18px;
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+}
+
+.container {
+    padding: 16px;
+}
+
+.card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.input-row {
+    margin-bottom: 14px;
+}
+
+.label {
+    font-size: 13px;
+    color: var(--sub);
+    margin-bottom: 6px;
+}
+
+input {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    background: #f2f2f7;
+    font-size: 16px;
+}
+
+input:focus {
+    outline: 2px solid var(--primary);
+}
+
+.btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 14px;
+    border: none;
+    font-size: 17px;
+    font-weight: 600;
+    background: var(--primary);
+    color: white;
+    margin-top: 10px;
+}
+
+.result {
+    display: none;
+}
+
+.result-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.result-row:last-child {
+    border-bottom: none;
+}
+
+.total {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.fade-in {
+    animation: fade 0.3s ease;
+}
+
+@keyframes fade {
+    from {opacity: 0; transform: translateY(10px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">Hotel Billing</div>
+
+<div class="container">
+
+    <div class="card">
+        <div class="input-row">
+            <div class="label">Giá giờ đầu</div>
+            <input type="number" id="priceFirst" value="70000">
+        </div>
+
+        <div class="input-row">
+            <div class="label">Giá giờ tiếp theo</div>
+            <input type="number" id="priceExtra" value="10000">
+        </div>
+
+        <div class="input-row">
+            <div class="label">Giờ vào</div>
+            <input type="time" id="timeIn">
+        </div>
+
+        <div class="input-row">
+            <div class="label">Giờ ra</div>
+            <input type="time" id="timeOut">
+        </div>
+
+        <div class="input-row">
+            <div class="label">Tiền nước</div>
+            <input type="number" id="waterTotal" placeholder="0">
+        </div>
+
+        <button class="btn" onclick="calculate()">Tính tiền</button>
+    </div>
+
+    <div id="result" class="card result">
+        <div class="result-row">
+            <span>Thời gian</span>
+            <span id="resHours"></span>
+        </div>
+        <div class="result-row">
+            <span>Tiền phòng</span>
+            <span id="resRoom"></span>
+        </div>
+        <div class="result-row">
+            <span>Tiền nước</span>
+            <span id="resWater"></span>
+        </div>
+        <div class="result-row total">
+            <span>Tổng</span>
+            <span id="resTotal"></span>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// set giờ mặc định
+window.onload = () => {
+    const now = new Date();
+    const t = now.toTimeString().slice(0,5);
+    document.getElementById('timeIn').value = t;
+};
+
+// tính tiền
+function calculate() {
+    const pFirst = +document.getElementById('priceFirst').value || 0;
+    const pExtra = +document.getElementById('priceExtra').value || 0;
+    const tIn = document.getElementById('timeIn').value;
+    const tOut = document.getElementById('timeOut').value;
+    const water = +document.getElementById('waterTotal').value || 0;
+
+    if (!tIn || !tOut) {
+        alert("Nhập giờ vào/ra!");
+        return;
+    }
+
+    const [h1,m1] = tIn.split(':').map(Number);
+    const [h2,m2] = tOut.split(':').map(Number);
+
+    let minutes = (h2*60+m2)-(h1*60+m1);
+    if (minutes < 0) minutes += 1440;
+
+    const hours = Math.ceil(minutes/60);
+
+    const room = pFirst + Math.max(0, hours-1)*pExtra;
+    const total = room + water;
+
+    document.getElementById('resHours').innerText = hours + " giờ";
+    document.getElementById('resRoom').innerText = room.toLocaleString('vi-VN') + " đ";
+    document.getElementById('resWater').innerText = water.toLocaleString('vi-VN') + " đ";
+    document.getElementById('resTotal').innerText = total.toLocaleString('vi-VN') + " đ";
+
+    const result = document.getElementById('result');
+    result.style.display = 'block';
+    result.classList.add('fade-in');
+}
+
+// đăng ký service worker (PWA)
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js');
+}
+</script>
+
+</body>
+</html>
