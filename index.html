@@ -12,110 +12,7 @@
 
 <!-- iOS icon -->
 <link rel="apple-touch-icon" href="icon-192.png">
-
-<style>
-:root {
-    --bg: #f2f2f7;
-    --card: #ffffff;
-    --primary: #007aff;
-    --text: #1c1c1e;
-    --sub: #8e8e93;
-}
-
-body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-    background: var(--bg);
-    color: var(--text);
-}
-
-.header {
-    text-align: center;
-    font-weight: 600;
-    padding: 16px;
-    font-size: 18px;
-    background: rgba(255,255,255,0.8);
-    backdrop-filter: blur(10px);
-    position: sticky;
-    top: 0;
-}
-
-.container {
-    padding: 16px;
-}
-
-.card {
-    background: var(--card);
-    border-radius: 16px;
-    padding: 16px;
-    margin-bottom: 16px;
-}
-
-.input-row {
-    margin-bottom: 14px;
-}
-
-.label {
-    font-size: 13px;
-    color: var(--sub);
-    margin-bottom: 6px;
-}
-
-input {
-    width: 100%;
-    padding: 14px;
-    border-radius: 12px;
-    border: none;
-    background: #f2f2f7;
-    font-size: 16px;
-}
-
-input:focus {
-    outline: 2px solid var(--primary);
-}
-
-.btn {
-    width: 100%;
-    padding: 16px;
-    border-radius: 14px;
-    border: none;
-    font-size: 17px;
-    font-weight: 600;
-    background: var(--primary);
-    color: white;
-    margin-top: 10px;
-}
-
-.result {
-    display: none;
-}
-
-.result-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 12px 0;
-    border-bottom: 1px solid #eee;
-}
-
-.result-row:last-child {
-    border-bottom: none;
-}
-
-.total {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--primary);
-}
-
-.fade-in {
-    animation: fade 0.3s ease;
-}
-
-@keyframes fade {
-    from {opacity: 0; transform: translateY(10px);}
-    to {opacity: 1; transform: translateY(0);}
-}
-</style>
+<link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
@@ -146,11 +43,16 @@ input:focus {
         </div>
 
         <div class="input-row">
-            <div class="label">Tiền nước</div>
-            <input type="number" id="waterTotal" placeholder="0">
+            <div class="label">Số lượng nước (10.000 đ/chai)</div>
+            <input type="number" id="waterQty" value="0" min="0" step="1">
         </div>
 
-        <button class="btn" onclick="calculate()">Tính tiền</button>
+        <div class="action-row">
+            <button id="checkInBtn" class="btn btn-secondary" type="button">Checkin</button>
+            <button id="checkOutBtn" class="btn btn-secondary" type="button">Checkout</button>
+        </div>
+
+        <button id="calculateBtn" class="btn" type="button">Tính tiền</button>
     </div>
 
     <div id="result" class="card result">
@@ -172,55 +74,20 @@ input:focus {
         </div>
     </div>
 
+    <div class="card">
+        <div class="history-head">
+            <div class="history-title">Lịch sử</div>
+            <button id="clearHistoryBtn" class="history-clear-btn" type="button">Xóa toàn bộ</button>
+        </div>
+        <div id="historyList" class="history-empty">Chưa có lượt tính tiền nào.</div>
+    </div>
+
 </div>
 
-<script>
-// set giờ mặc định
-window.onload = () => {
-    const now = new Date();
-    const t = now.toTimeString().slice(0,5);
-    document.getElementById('timeIn').value = t;
-};
-
-// tính tiền
-function calculate() {
-    const pFirst = +document.getElementById('priceFirst').value || 0;
-    const pExtra = +document.getElementById('priceExtra').value || 0;
-    const tIn = document.getElementById('timeIn').value;
-    const tOut = document.getElementById('timeOut').value;
-    const water = +document.getElementById('waterTotal').value || 0;
-
-    if (!tIn || !tOut) {
-        alert("Nhập giờ vào/ra!");
-        return;
-    }
-
-    const [h1,m1] = tIn.split(':').map(Number);
-    const [h2,m2] = tOut.split(':').map(Number);
-
-    let minutes = (h2*60+m2)-(h1*60+m1);
-    if (minutes < 0) minutes += 1440;
-
-    const hours = Math.ceil(minutes/60);
-
-    const room = pFirst + Math.max(0, hours-1)*pExtra;
-    const total = room + water;
-
-    document.getElementById('resHours').innerText = hours + " giờ";
-    document.getElementById('resRoom').innerText = room.toLocaleString('vi-VN') + " đ";
-    document.getElementById('resWater').innerText = water.toLocaleString('vi-VN') + " đ";
-    document.getElementById('resTotal').innerText = total.toLocaleString('vi-VN') + " đ";
-
-    const result = document.getElementById('result');
-    result.style.display = 'block';
-    result.classList.add('fade-in');
-}
-
-// đăng ký service worker (PWA)
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js');
-}
-</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="script.js"></script>
 
 </body>
 </html>
