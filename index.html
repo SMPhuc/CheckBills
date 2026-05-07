@@ -18,6 +18,7 @@
 <body>
 
 <div class="header">Hotel Billing</div>
+<div id="operatorBadge" class="operator-badge"></div>
 
 <div class="container">
 
@@ -76,12 +77,45 @@
 
     <div class="card">
         <div class="history-head">
-            <div class="history-title">Lịch sử</div>
+            <div>
+                <div class="history-title">Lịch sử tuần này</div>
+                <div id="weekRangeLabel" class="history-week-range"></div>
+            </div>
             <button id="clearHistoryBtn" class="history-clear-btn" type="button">Xóa toàn bộ</button>
         </div>
         <div id="historyList" class="history-empty">Chưa có lượt tính tiền nào.</div>
     </div>
 
+    <div class="card">
+        <div class="history-title">Xuất báo cáo</div>
+        <div class="report-row">
+            <div class="input-row report-input">
+                <div class="label">Từ ngày</div>
+                <input type="date" id="reportStart">
+            </div>
+            <div class="input-row report-input">
+                <div class="label">Đến ngày</div>
+                <input type="date" id="reportEnd">
+            </div>
+        </div>
+        <button id="exportReportBtn" class="btn btn-secondary report-export-btn" type="button">Xuất danh sách bill</button>
+        <div id="exportProgress" class="export-progress hidden" aria-live="polite">
+            <div class="export-progress-text">Đang xuất file...</div>
+            <div class="export-progress-track">
+                <div class="export-progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div id="operatorModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+        <div class="history-title">Xác nhận người nhập liệu</div>
+        <div class="label">Tên người thực hiện</div>
+        <input type="text" id="operatorNameInput" placeholder="Nhập tên người thực hiện">
+        <button id="confirmOperatorBtn" class="btn" type="button">Bắt đầu nhập liệu</button>
+    </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
